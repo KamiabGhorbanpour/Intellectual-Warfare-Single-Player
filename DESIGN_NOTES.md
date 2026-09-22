@@ -7,7 +7,7 @@
 - The player must select exactly the printed requirement before submission.
 - Selections can be revised until submission.
 - The first submission is final for scoring: success is worth one point and failure is worth zero.
-- A selection succeeds only when every assigned agent shares at least one trait with the event's hidden relevant traits. This is the resolution rule used by the supplied multiplayer source.
+- A selection succeeds when a majority of the required agents match at least one hidden relevant trait: 1 of 1, 1 of 2, or 2 of 3. The player must still assign exactly the printed number of agents.
 - Hidden traits and per-agent matches are revealed after the attempt.
 - Scores, streaks, a final rank, a run review, and per-faction personal bests are displayed.
 - Personal bests are browser-specific. There is no login, public leaderboard, or database in this version.
