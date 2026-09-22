@@ -17,9 +17,9 @@ def evaluate_attempt(
 ) -> dict[str, Any]:
     """Evaluate one irreversible, scored attempt.
 
-    A card succeeds under the original game's rule: the player must assign the
-    exact number of agents printed as the requirement, and every assigned agent
-    must share at least one trait with the card's hidden solution traits.
+    The player must assign the exact number of agents printed as the requirement.
+    The mission passes when at least half of the assigned agents, rounded up,
+    share at least one trait with the card's hidden solution traits.
     """
 
     required_count = int(event["requirement"])
@@ -40,13 +40,17 @@ def evaluate_attempt(
             }
         )
 
-    success = all(result["matched"] for result in agent_results)
+    matched_count = sum(1 for result in agent_results if result["matched"])
+    pass_threshold = (required_count + 1) // 2
+    success = matched_count >= pass_threshold
     return {
         "event_id": event["id"],
         "event": event["name"],
         "success": success,
         "points": 1 if success else 0,
         "required_count": required_count,
+        "matched_count": matched_count,
+        "pass_threshold": pass_threshold,
         "required_traits": sorted(required_traits),
         "agents": agent_results,
     }
@@ -110,12 +114,13 @@ def validate_content(
             for agent in agent_list
             if set(agent["traits"]) & set(event["traits"])
         ]
+        pass_threshold = (requirement + 1) // 2
         if requirement < 1:
             problems.append(f"{event['id']} has an invalid requirement.")
-        elif len(matching_agents) < requirement:
+        elif len(matching_agents) < pass_threshold:
             problems.append(
-                f"{event['id']} needs {requirement} matching agents but only "
-                f"{len(matching_agents)} are available."
+                f"{event['id']} needs at least {pass_threshold} matching agent(s) "
+                f"to pass but only {len(matching_agents)} are available."
             )
 
     return problems
