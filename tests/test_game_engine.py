@@ -25,10 +25,37 @@ class GameEngineTests(unittest.TestCase):
         self.assertTrue(result["success"])
         self.assertEqual(result["points"], 1)
 
-    def test_one_wrong_agent_fails_entire_attempt(self) -> None:
+    def test_one_match_out_of_two_passes(self) -> None:
         result = evaluate_attempt(self.event, [self.agents[0], self.agents[2]])
+        self.assertTrue(result["success"])
+        self.assertEqual(result["points"], 1)
+        self.assertEqual(result["matched_count"], 1)
+        self.assertEqual(result["pass_threshold"], 1)
+
+    def test_zero_matches_out_of_two_fails(self) -> None:
+        wrong_agents = [
+            {"id": "c", "name": "C", "traits": ["obstinacy"]},
+            {"id": "d", "name": "D", "traits": ["arrogance"]},
+        ]
+        result = evaluate_attempt(self.event, wrong_agents)
         self.assertFalse(result["success"])
         self.assertEqual(result["points"], 0)
+
+    def test_two_matches_required_out_of_three(self) -> None:
+        event = {
+            "id": "event3",
+            "name": "Three Agent Event",
+            "traits": ["curiosity", "humility"],
+            "requirement": 3,
+        }
+        one_match = [
+            self.agents[0],
+            self.agents[2],
+            {"id": "d", "name": "D", "traits": ["arrogance"]},
+        ]
+        two_matches = self.agents
+        self.assertFalse(evaluate_attempt(event, one_match)["success"])
+        self.assertTrue(evaluate_attempt(event, two_matches)["success"])
 
     def test_exact_requirement_is_enforced(self) -> None:
         with self.assertRaises(ValueError):
