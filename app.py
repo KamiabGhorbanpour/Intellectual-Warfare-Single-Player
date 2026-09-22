@@ -139,7 +139,6 @@ TRAIT_HINTS = {
     "intellectual_courage": "The situation calls for someone willing to pursue or voice a difficult conclusion despite social or political risk.",
     "intellectual_integrity": "Look for consistency between what someone claims to value and how they actually reason or act.",
     "intellectual_empathy": "Try to understand the situation from the perspective of people whose experience differs from your own.",
-    "legitimacy_preservation": "The institution is primarily concerned with protecting its standing and authority.",
 }
 
 
