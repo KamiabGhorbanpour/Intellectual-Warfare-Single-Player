@@ -386,7 +386,7 @@ IRGC_EVENTS = [
         "name": "Grand Ayatollah Household",
         "image": "11.png",
         "text": "Some protestors have been targeting a famous grand Ayatollah's household. We need agents who could defuse the situation by any means necessary. If we cannot protect our grand Ayatollahs, then what are we doing?",
-        "traits": [trait("Legitimacy Preservation"), trait("Epistemic Justice"), trait("Arrogance")],
+        "traits": [trait("Legitimacy Awareness"), trait("Epistemic Justice"), trait("Arrogance")],
         "requirement": 2,
         "longevity": 1,
     },
