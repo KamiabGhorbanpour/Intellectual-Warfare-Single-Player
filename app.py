@@ -84,6 +84,12 @@ body {
     display: inline-flex; align-items: center; gap: 8px; padding: 8px 13px;
     border-radius: 999px; background: #e9f0ff; color: var(--blue-dark); font-weight: 850;
 }
+.hint-panel {
+    border-radius: 14px;
+    background: #eef5ff;
+    padding: 14px 16px;
+    color: var(--ink);
+}
 .feedback-success { border-left: 6px solid var(--green); }
 .feedback-failure { border-left: 6px solid var(--red); }
 .review-success { border-left: 4px solid var(--green); }
@@ -111,6 +117,35 @@ def agent_image_url(side: str, filename: str) -> str:
 
 def event_image_url(side: str, filename: str) -> str:
     return image_url(STATIC_ROUTES[f"{side}_events"], filename)
+
+
+TRAIT_HINTS = {
+    "binary_thinking": (
+        "The institution demands a simple loyal-versus-hostile classification of the gathering. "
+        "This card rewards the habit of forcing complex motives into two camps."
+    ),
+    "thoroughness": "Slow down and check the details rather than acting on the first plausible story.",
+    "curiosity": "Look for someone inclined to investigate further instead of stopping at the obvious explanation.",
+    "epistemic_justice": "Consider who is being believed, dismissed, or treated unfairly as a source of knowledge.",
+    "legitimacy_awareness": "Think about how an action will affect whether people regard the institution as justified or trustworthy.",
+    "arrogance": "A rigid sense of certainty or superiority may fit what this institution is asking for.",
+    "epistemic_cowardice": "The useful disposition here avoids challenging a dominant view even when doubts are available.",
+    "intellectual_humility": "The situation benefits from someone willing to admit uncertainty or revise an initial judgment.",
+    "confirmation_bias": "The institution may reward someone who interprets new information in a way that protects an existing belief.",
+    "open_mindedness": "Look for someone willing to seriously consider alternatives rather than locking onto one interpretation.",
+    "close_mindedness": "The task may reward resistance to competing perspectives or inconvenient evidence.",
+    "obstinacy": "Persistence in a fixed position, even under pressure to reconsider, is useful here.",
+    "epistemic_authoritarianism": "The task favors deference to an imposed source of authority over independent evaluation.",
+    "intellectual_courage": "The situation calls for someone willing to pursue or voice a difficult conclusion despite social or political risk.",
+    "intellectual_integrity": "Look for consistency between what someone claims to value and how they actually reason or act.",
+    "intellectual_empathy": "Try to understand the situation from the perspective of people whose experience differs from your own.",
+    "legitimacy_preservation": "The institution is primarily concerned with protecting its standing and authority.",
+}
+
+
+def hint_for_event(event: dict[str, Any]) -> str:
+    hints = [TRAIT_HINTS[value] for value in event["traits"] if value in TRAIT_HINTS]
+    return " ".join(hints)
 
 
 @app.get("/health")
@@ -232,23 +267,6 @@ def arcade_page() -> None:
         render_header("Solo arcade edition")
         with ui.column().classes("gap-4 py-8"):
             ui.label("THINK ONCE. COMMIT. SCORE.").classes("display-title")
-            ui.label(
-                "Read the event, study the agents, and make one scored decision. "
-                "Every correct first attempt earns one point."
-            ).classes("text-xl muted max-w-3xl")
-
-        with ui.card().classes("paper-card w-full p-5"):
-            ui.label("How a run works").classes("text-xl font-black")
-            with ui.row().classes("w-full gap-6 flex-wrap"):
-                for number, title, body in [
-                    ("01", "Read", "Each run draws 10 event cards in a new order."),
-                    ("02", "Assign", "Choose exactly the number of agents printed on the card."),
-                    ("03", "Commit", "Your first submission is final for scoring; solutions appear afterward."),
-                ]:
-                    with ui.column().classes("gap-1 flex-1 min-w-64"):
-                        ui.label(number).classes("eyebrow")
-                        ui.label(title).classes("text-lg font-black")
-                        ui.label(body).classes("muted")
 
         ui.label("Choose your faction").classes("section-title pt-4")
         scores = best_scores()
@@ -303,24 +321,14 @@ def arcade_page() -> None:
 
         with ui.row().classes("w-full gap-5 items-start flex-wrap"):
             with ui.card().classes("paper-card event-panel gap-4"):
-                ui.label("CURRENT EVENT").classes("eyebrow")
                 ui.image(event_image_url(side, event["image"])).classes("event-art")
-                ui.label(event["name"]).classes("text-2xl font-black")
-                ui.label(event["text"]).classes("muted leading-relaxed")
-                ui.html(
-                    f'<span class="requirement-pill">SELECT EXACTLY {event["requirement"]} AGENT'
-                    f'{"S" if event["requirement"] != 1 else ""}</span>'
-                )
+                hint_text = hint_for_event(event)
+                if hint_text:
+                    with ui.expansion("HINT", icon="lightbulb_outline").classes("w-full"):
+                        ui.label(hint_text).classes("hint-panel leading-relaxed")
 
             with ui.column().classes("roster-panel gap-4"):
                 ui.label("SELECT YOUR AGENTS").classes("section-title")
-                if feedback is None:
-                    ui.label(
-                        "You may change your selection until you press Commit First Attempt."
-                    ).classes("muted")
-                else:
-                    ui.label("The attempt is locked. Review the result before continuing.").classes("muted")
-
                 with ui.row().classes("w-full gap-3 flex-wrap"):
                     for agent in agents_for(side):
                         selected = agent["id"] in state["selected"]
@@ -337,7 +345,7 @@ def arcade_page() -> None:
                     requirement = int(event["requirement"])
                     ui.label(f"Selected: {selected_count} / {requirement}").classes("font-bold")
                     submit = ui.button(
-                        "COMMIT FIRST ATTEMPT",
+                        "COMMIT",
                         on_click=submit_attempt,
                     ).props("unelevated color=primary size=lg").classes("primary-button")
                     if selected_count != requirement:
@@ -352,9 +360,6 @@ def arcade_page() -> None:
             ui.label("CORRECT — +1 POINT" if success else "INCORRECT — NO POINT").classes(
                 "text-2xl font-black"
             )
-            ui.label(
-                "Each selected agent needed at least one trait relevant to this event."
-            ).classes("muted")
             for agent_result in result["agents"]:
                 matches = agent_result["matching_traits"]
                 with ui.row().classes("items-center gap-2"):
