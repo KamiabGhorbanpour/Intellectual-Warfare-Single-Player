@@ -289,8 +289,9 @@ def arcade_page() -> None:
                     (
                         "04",
                         "Submit the assignment",
-                        "The submission is final. You receive one point when every selected agent "
-                        "has at least one relevant trait. The relevant traits are shown after scoring.",
+                        "The submission is final. A mission passes when at least half of the required "
+                        "agents, rounded up, have a relevant trait: 1 of 1, 1 of 2, or 2 of 3. "
+                        "The relevant traits are shown after scoring.",
                     ),
                 ]:
                     with ui.column().classes("gap-1 flex-1 min-w-64"):
@@ -382,9 +383,13 @@ def arcade_page() -> None:
         success = result["success"]
         css = "paper-card feedback-success" if success else "paper-card feedback-failure"
         with ui.card().classes(f"{css} w-full p-5 gap-3"):
-            ui.label("CORRECT — +1 POINT" if success else "INCORRECT — NO POINT").classes(
+            ui.label("MISSION PASSED — +1 POINT" if success else "MISSION FAILED — NO POINT").classes(
                 "text-2xl font-black"
             )
+            ui.label(
+                f"Matched: {result['matched_count']} / {result['required_count']} "
+                f"(need {result['pass_threshold']} to pass)"
+            ).classes("text-sm font-bold")
             for agent_result in result["agents"]:
                 matches = agent_result["matching_traits"]
                 with ui.row().classes("items-center gap-2"):
