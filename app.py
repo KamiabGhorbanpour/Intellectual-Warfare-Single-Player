@@ -264,36 +264,62 @@ def arcade_page() -> None:
                 ui.button("EXIT RUN", on_click=leave_run).props("flat color=grey-8")
 
     def render_home() -> None:
-        render_header("Solo arcade edition")
+        render_header("Single-player game")
         with ui.column().classes("gap-4 py-8"):
-            ui.label("THINK ONCE. COMMIT. SCORE.").classes("display-title")
+            ui.label("HOW TO PLAY").classes("display-title")
+
+        with ui.card().classes("paper-card w-full p-5"):
+            ui.label("Instructions").classes("text-xl font-black")
+            with ui.row().classes("w-full gap-6 flex-wrap"):
+                for number, title, body in [
+                    (
+                        "01",
+                        "Choose a faction",
+                        "Select Azadikhah or the IRGC. Each faction has a different roster.",
+                    ),
+                    (
+                        "02",
+                        "Review the event",
+                        "Read the event and compare its problem with the traits of the available agents.",
+                    ),
+                    (
+                        "03",
+                        "Assign agents",
+                        "Select exactly the number of agents required by the event.",
+                    ),
+                    (
+                        "04",
+                        "Submit the assignment",
+                        "The submission is final. You receive one point when every selected agent "
+                        "has at least one relevant trait. The relevant traits are shown after scoring.",
+                    ),
+                ]:
+                    with ui.column().classes("gap-1 flex-1 min-w-64"):
+                        ui.label(number).classes("eyebrow")
+                        ui.label(title).classes("text-lg font-black")
+                        ui.label(body).classes("muted")
 
         ui.label("Choose your faction").classes("section-title pt-4")
-        scores = best_scores()
         with ui.row().classes("w-full gap-5 flex-wrap"):
             with ui.card().classes("paper-card faction-card azadikhah gap-4"):
                 ui.label("AZADIKHAH").classes("eyebrow")
-                ui.label("Opposition Network").classes("text-3xl font-black")
+                ui.label("Opposition Coalition").classes("text-3xl font-black")
                 ui.label(
-                    "Verify information, build coalitions, and respond to political crises through "
-                    "intellectual virtues."
+                    "Play with the six-agent roster of the fictional Iranian opposition coalition."
                 ).classes("muted")
-                ui.label(f"Personal best: {scores['Azadikhah']} / {STANDARD_RUN_LENGTH}").classes("font-bold")
                 ui.button(
-                    "START AZADIKHAH RUN",
+                    "PLAY AS AZADIKHAH",
                     on_click=lambda: start_run("Azadikhah"),
                 ).props("unelevated color=primary size=lg").classes("primary-button")
 
             with ui.card().classes("paper-card faction-card irgc gap-4"):
                 ui.label("IRGC").classes("eyebrow")
-                ui.label("State Security Network").classes("text-3xl font-black")
+                ui.label("Islamic Revolutionary Guard Corps").classes("text-3xl font-black")
                 ui.label(
-                    "Manage unrest, information, and regime legitimacy using a roster mixing "
-                    "virtues, vices, and institutional habits."
+                    "Play with the seven-agent roster of the Islamic Revolutionary Guard Corps."
                 ).classes("muted")
-                ui.label(f"Personal best: {scores['IRGC']} / {STANDARD_RUN_LENGTH}").classes("font-bold")
                 ui.button(
-                    "START IRGC RUN",
+                    "PLAY AS IRGC",
                     on_click=lambda: start_run("IRGC"),
                 ).props("unelevated color=red-8 size=lg").classes("primary-button")
 
